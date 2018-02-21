@@ -11,32 +11,35 @@
     <form>
   <div class="form-group">
     <label for="exampleFormControlTextarea1">Pertanyaan</label>
-    <quill-editor v-model="question"></quill-editor>
+    <quill-editor v-model="questions.description"></quill-editor>
+    <p class="text-danger" v-text="errors.get('description')"></p>
   </div>
 
   <div class="form-group">
     <label for="formGroupExampleInput2">Jenis Pertanyaan</label>
-    <select class="custom-select" v-model="question_type">
+    <select class="custom-select" :class="{ 'is-invalid' : errors.get('question_type_id') }" v-model="questions.question_type_id" @change="errors.clear('question_type_id')">
 	  <option selected value="">Jenis Pertanyaan</option>
 	  <option value="1">Pilihan Ganda</option>
 	  <option value="2">Essay</option>
   	</select>
+  	<p class="text-danger" v-text="errors.get('question_type_id')"></p>
   </div>
 
-  <div class="form-group" v-if="question_type === '2'">
+  <div class="form-group" v-if="questions.question_type_id === '2'">
   	<label>Jawaban</label>
   	<input type="text" name="" class="form-control" />
 
   </div>
 
-  <div class="form-row"  v-if="question_type === '1'" v-for="(n,index) in 4">
+  <div class="form-row"  v-if="questions.question_type_id === '1'" v-for="(n,index) in multiple_choice">
   	<div class="form-group col-md-8" b>
   		<!-- <label>Jawaban @{{ (n+9).toString(36) }}</label> -->
   	  <div class="input-group">
         <div class="input-group-prepend">
-          <div class="input-group-text">@{{ (n+9).toString(36) }}</div>
+          <div class="input-group-text">@{{ n.answer_choice }}</div>
         </div>
-        <input type="text" class="form-control" id="inlineFormInputGroupUsername" :placeholder="'Jawaban '+(n+9).toString(36)">
+        <input type="text" class="form-control" v-model="n.answer_description" id="inlineFormInputGroupUsername" :placeholder="'Jawaban '+n.answer_choice">
+        <!-- <input type="radio" v-model="multiple_choice.answer_choice[index]" :value=" (n+9).toString(36) " /> -->
   	</div>
   </div>
    <div class="form-group col-md-4">
@@ -53,16 +56,64 @@
 
 @push('scripts')
 	<script type="text/javascript">
+		class Errors{
+			constructor(){
+				this.errors = {};
+			}
+
+			get(field){
+				if(this.errors[field]){
+					return this.errors[field][0];
+				}
+			}
+
+			clear(field){
+				delete this.errors[field];
+			}
+
+			record(errors){
+				this.errors = errors;
+			}
+		}
+
+		function getAnswerChoice(){
+					let tmp=[];
+					for(let i=0;i<4;i++){
+						let obj={};
+						obj['answer_choice']=(i+10).toString(36);
+						obj['answer_description']='';
+						tmp.push(obj);
+					}
+					return tmp;
+		}
+
 		new Vue({
 			el:"#app",
 			data:{
-				question_type:"",
-				question:""
+				questions:{
+					question_type_id:"",
+					description:""
+				},
+				multiple_choice:this.getAnswerChoice(),
+				errors : new Errors(),
 			},
 			methods:{
 				saveQuestion(){
 					let url='./';
-					axios.post(url,{description:this.question})
+					axios.post(url,{questions:{this.$data.questions},multiple_choice:{this.$data.multiple_choice}})
+					.then()
+					.catch(error=>{
+						this.errors.record(error.response.data.errors);
+					})
+				}
+			},
+			computed:{
+				choices(){
+					let tmp=[];
+					for(let i=0;i<4;i++){
+						tmp.push((i+10).toString(36))
+					}
+					return tmp;
 				}
 			}
 		})
