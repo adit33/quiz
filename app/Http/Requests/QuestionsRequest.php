@@ -24,8 +24,20 @@ class QuestionsRequest extends FormRequest
     public function rules()
     {
         return [
-            'description' =>'required',
-            'question_type_id'     =>'required'
+            'description'                     =>'required',
+            'question_type_id'                =>'required',
+            'multiple_choice.*.answer_description' =>'required'
+        ];
+    }
+
+    public function messages(){
+        return [
+            'description.required' => 'Pertanyaan Harap di Isi',
+            'custom'=>[
+                'multiple_choice.*.answer_description' => [
+                    'required'=>'Jawaban Wajib di isi'
+                    ]
+                ]
         ];
     }
 }

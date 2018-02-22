@@ -38,13 +38,20 @@
         <div class="input-group-prepend">
           <div class="input-group-text">@{{ n.answer_choice }}</div>
         </div>
-        <input type="text" class="form-control" v-model="n.answer_description" id="inlineFormInputGroupUsername" :placeholder="'Jawaban '+n.answer_choice">
+        <input type="text" class="form-control" :class="{ 'is-invalid' : errors.get('multiple_choice.'+index+'.answer_description') }" v-model="n.answer_description" id="inlineFormInputGroupUsername" :placeholder="'Jawaban '+n.answer_choice" >
         <!-- <input type="radio" v-model="multiple_choice.answer_choice[index]" :value=" (n+9).toString(36) " /> -->
   	</div>
   </div>
    <div class="form-group col-md-4">
-      <input type="radio" name="jawaban[]" >
-    </div>	
+	   <div class="form-check">
+	  <input class="form-check-input" name="jawaban[]" :class="{ 'is-invalid' : errors.get('multiple_choice.'+index+'.answer_description') }" type="radio" name="exampleRadios" id="exampleRadios1">
+	  <label class="form-check-label" for="exampleRadios1">
+	   @{{ n.answer_choice }}
+	  </label>
+	</div>
+      <!-- <input type="radio" name="jawaban[]" class="form-control" :class="{ 'is-invalid' : errors.get('multiple_choice.'+index+'.answer_description') }"> -->
+    </div>
+     <p class="text-danger" v-text="errors.get('multiple_choice.'+index+'.answer_description')"></p>	
   </div>
 
   <button type="button" class="btn btn-primary" @click="saveQuestion">Simpan</button>
@@ -100,7 +107,12 @@
 			methods:{
 				saveQuestion(){
 					let url='./';
-					axios.post(url,{questions:{this.$data.questions},multiple_choice:{this.$data.multiple_choice}})
+					axios.post(url,
+						{
+							description:this.$data.questions.description,
+							question_type_id:this.$data.questions.question_type_id,
+							multiple_choice:this.$data.multiple_choice,
+						})
 					.then()
 					.catch(error=>{
 						this.errors.record(error.response.data.errors);

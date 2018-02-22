@@ -103,6 +103,9 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        'multiple_choice.*.answer_description' => [
+                    'required'=>'Jawaban Wajib di isi'
+        ]
     ],
 
     /*
