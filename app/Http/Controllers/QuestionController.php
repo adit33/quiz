@@ -8,6 +8,10 @@ use App\Models\Question;
 
 use App\Models\MultipleChoice;
 
+use App\Models\Answer;
+
+use App\DataTables\QuestionDataTable;
+
 use App\Http\Requests\QuestionsRequest;
 
 class QuestionController extends Controller
@@ -15,6 +19,11 @@ class QuestionController extends Controller
 	public function __construct(Question $question){
 		$this->question = $question;
 	}
+
+    public function index(QuestionDataTable $dataTable){
+        $title='index';
+        return $dataTable->render('backend.admin.question.index',compact('title'));
+    }   
 
     public function create(){
     	return view('backend.admin.question.create')
@@ -34,8 +43,16 @@ class QuestionController extends Controller
     	return view('backend.admin.question.show',compact('question'));
     }
 
+    public function setAnswer($id,Request $request){
+       $answer = new Answer;
+       $data['question_id']=$id;
+       $data['answer']=$request->input('answer');
+
+       $answer->saveAnswer($data); 
+    }
+
     public function getQuestion(){
-    	$question=Question::with('multiple_choice')->find(25);
+    	$question=Question::with('multiple_choice')->paginate(1);
 
     	return $question;
     }

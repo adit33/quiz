@@ -17,4 +17,9 @@ Route::get('/', function () {
 
 Route::prefix('admin')->group(function(){
 	Route::resource('question','QuestionController');
+	Route::put('quiz/{id}/setanswer',['uses'=>'QuestionController@setAnswer','as'=>'question.setanswer']);
+});
+
+Route::get('start',function(){
+		return view('frontend.quiz.index');
 });
