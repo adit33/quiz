@@ -16,8 +16,18 @@ class QuestionDataTable extends DataTable
     public function dataTable($query)
     {
         return datatables($query)
-            ->rawColumns(['description'])
-            ->addColumn('action', 'question.action');
+            ->rawColumns(['description','status','action'])
+            ->addColumn('status',function($query){
+                if(is_null($query->answer)){
+                    return '<span class="badge badge-success">Sudah di isi</span>';
+                }else{
+                    return '<span class="badge badge-danger">Belum di isi</span>';   
+                }
+                
+            })
+            ->addColumn('action', function($query){
+                return '<a href="'.route('question.show',$query->id).'">Lihat</a>';
+            });
     }
 
     /**
@@ -55,6 +65,7 @@ class QuestionDataTable extends DataTable
         return [
             'id',
             'description',
+            'status',
             'created_at',
             'updated_at'
         ];

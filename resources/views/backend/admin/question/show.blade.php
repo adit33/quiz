@@ -11,7 +11,7 @@
 	<div class="card"></div>
 
 	@foreach($question->multiple_choice as $multiple_choice)
-		<input type="radio" name="answer" value="{{ $multiple_choice->answer_choice }}">{!! $multiple_choice->answer_choice !!}. {!! $multiple_choice->answer_description !!} <br>
+	{{ Form::radio('answer', $multiple_choice->answer_choice, (! is_null($question->answer)) AND $question->answer->answer === $multiple_choice->answer_choice ? 'true' : '') }} {!! $multiple_choice->answer_choice !!}. {!! $multiple_choice->answer_description !!} <br>
 	@endforeach
 
 	 <input type="submit" class="btn btn-primary" value="Save"></input>

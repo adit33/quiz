@@ -25,6 +25,10 @@ class Question extends Model
 		return $multiple_choice_data;
     }
 
+    public function answer(){
+    	return $this->hasOne(Answer::class);
+    }
+
     public function multiple_choice(){
     	return $this->hasMany(MultipleChoice::class);
     }

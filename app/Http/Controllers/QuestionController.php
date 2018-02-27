@@ -39,8 +39,9 @@ class QuestionController extends Controller
     }
 
     public function show($id){
-    	$question=Question::with('multiple_choice')->find($id);
+    	$question=Question::with('multiple_choice','answer')->find($id);
     	return view('backend.admin.question.show',compact('question'));
+        
     }
 
     public function setAnswer($id,Request $request){
@@ -52,9 +53,13 @@ class QuestionController extends Controller
     }
 
     public function getQuestion(){
-    	$question=Question::with('multiple_choice')->paginate(1);
-
+    	$question=Question::with('multiple_choice','answer')->paginate(1);
     	return $question;
+    }
+
+    public function checkAnswer($question_id){
+        $question=Question::with('multiple_choice','answer')->find($question_id);
+        
     }
 
 }

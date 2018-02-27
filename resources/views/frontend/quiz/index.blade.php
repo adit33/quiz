@@ -25,6 +25,7 @@
 		  </div>
 		</div>
 		@{{ answer }}
+		<button class="btn btn-success" @click="checkAnswer">Preview</button>
 		<button class="btn btn-primary" @click="fetchQuizzes(quizzes.current_page + 1)" :disabled="answer == '' ">Next</button>
 	</div>
 </div>
@@ -47,6 +48,9 @@
 					axios.get('api/question?page='+page).then(response=>{
 						this.quizzes = response.data;
 					})
+				},
+				checkAnswer(){
+					this.answer === this.quizzes.data[0].answer.answer;
 				}
 			}
 		})
