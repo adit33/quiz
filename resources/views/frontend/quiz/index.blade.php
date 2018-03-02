@@ -14,8 +14,9 @@
 @section('content')
 <div id="app">
 	<div class="container">
+
 	<alert v-if="answerResult.isVisible" :message="answerResult.message" :icon="answerResult.icon" :alert-class="answerResult.answerClass"></alert>
-		<div class="card border-primary mb-3" style="max-width: 18rem;" v-for="(quiz,index) in quizzes.data">
+		<div v-if="quizzes.length != 0" :class="{'animated bounce' : quizzes.length != 0 }" class="card border-primary mb-3" style="max-width: 18rem;" v-for="(quiz,index) in quizzes.data">
 		  <div class="card-header">Pertanyaan @{{ index  }}</div>
 		  <div class="card-body text-primary">
 		    <h5 class="card-title">Kategori</h5>
@@ -25,7 +26,6 @@
 		    </ul>
 		  </div>
 		</div>
-		@{{ answer }}
 		<button class="btn btn-success" @click="checkAnswer" :disabled="answer == ''">Preview</button>
 		<button class="btn btn-primary" @click="fetchQuizzes(quizzes.current_page + 1)" :disabled="answer == '' ">Next</button>
 	</div>
@@ -33,11 +33,11 @@
 @endsection
 
 @push('scripts')
-	<script type="text/javascript">
+	<script type="text/javascript">	
 	Vue.component('alert',{
 		props:['message','alertClass','icon'],
-		template: 	`<div>
-						<div class="alert alert-dismissible fade show" :class="alertClass" role="alert">
+		template: 	`<div class="animated bounceIn">
+						<div class="alert alert-dismissible fade show"  :class="alertClass" role="alert">
 						  <strong>@{{ message }}</strong> 
 						  <span>
 								<i :class="icon"></i>
@@ -67,26 +67,31 @@
 			methods:{
 				fetchQuizzes(page){
 					this.answer = ''
+					this.quizzes="";
 					this.answerResult.isVisible=false;
-					axios.get('api/question?page='+page).then(response=>{
+					setTimeout(()=> { //untuk eksekusi delay 
+						axios.get('api/question?page='+page).then(response=>{
 						this.quizzes = response.data;
 					})
+					}, 500); // selama satu detik
 				},
 				checkAnswer(){
-
-					let answer=this.answer === this.quizzes.data[0].answer.answer;
+					this.answerResult.isVisible=false;
+					setTimeout(()=> {
+						let answer=this.answer === this.quizzes.data[0].answer.answer;
 					
-					if(answer){
-						this.answerResult.message="Jawaban Anda Benar !!!";
-						this.answerResult.answerClass="alert-success";
-						this.answerResult.icon = 'far fa-smile';
-					}else{
-						this.answerResult.message="Jawaban Anda Salah !!!";
-						this.answerResult.answerClass="alert-danger";
-						this.answerResult.icon = 'far fa-frown';
-					}
+						if(answer){
+							this.answerResult.message="Jawaban Anda Benar !!!";
+							this.answerResult.answerClass="alert-success";
+							this.answerResult.icon = 'far fa-smile';
+						}else{
+							this.answerResult.message="Jawaban Anda Salah !!!";
+							this.answerResult.answerClass="alert-danger";
+							this.answerResult.icon = 'far fa-frown';
+						}
 
-					this.answerResult.isVisible=true;
+						this.answerResult.isVisible=true;
+					}, 500);
 
 				}
 			}
