@@ -53,7 +53,7 @@ class QuestionController extends Controller
     }
 
     public function getQuestion(){
-    	$question=Question::with('multiple_choice','answer')->paginate(1);
+    	$question=Question::with('multiple_choice','answer')->get();
     	return $question;
     }
 

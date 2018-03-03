@@ -16,7 +16,18 @@
 	<div class="container">
 
 	<alert v-if="answerResult.isVisible" :message="answerResult.message" :icon="answerResult.icon" :alert-class="answerResult.answerClass"></alert>
-		<div v-if="quizzes.length != 0" :class="{'animated bounce' : quizzes.length != 0 }" class="card border-primary mb-3" style="max-width: 18rem;" v-for="(quiz,index) in quizzes.data">
+<p>
+		 <router-link to="/">/home</router-link>
+  <router-link to="/foo">/foo</router-link>
+ 
+</p>
+ <router-view></router-view>
+		<div v-for="(quiz,index) in quizzes">
+			@{{ quiz.id }}
+		</div>
+
+
+		<div v-if="quizzes.length != 0" :class="{'animated bounce' : quizzes.length != 0 }" class="card border-primary mb-3" style="max-width: 18rem;" v-for="(quiz,index) in quizzes">
 		  <div class="card-header">Pertanyaan @{{ index  }}</div>
 		  <div class="card-body text-primary">
 		    <h5 class="card-title">Kategori</h5>
@@ -33,7 +44,23 @@
 @endsection
 
 @push('scripts')
+	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 	<script type="text/javascript">	
+
+	const Home = {template:'<div>Home</div>'};
+
+	const Foo = {template:'<div>Foo</div>'};	
+
+	const routes = {};
+
+	const router = new VueRouter({
+		mode: 'history',
+		 routes:[
+		    { path: '/', component: Home },
+		    { path: '/foo', component: Foo }
+		  ]
+	})
+
 	Vue.component('alert',{
 		props:['message','alertClass','icon'],
 		template: 	`<div class="animated bounceIn">
@@ -50,6 +77,7 @@
 	})
 
 		new Vue({
+			router,
 			el:"#app",
 			data:{
 				answer:'',
@@ -72,6 +100,7 @@
 					setTimeout(()=> { //untuk eksekusi delay 
 						axios.get('api/question?page='+page).then(response=>{
 						this.quizzes = response.data;
+						localStorage.setItem('quizess',JSON.stringify(response.data));
 					})
 					}, 500); // selama satu detik
 				},
@@ -95,6 +124,6 @@
 
 				}
 			}
-		})
+		});
 	</script>
 @endpush
