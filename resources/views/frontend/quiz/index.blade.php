@@ -14,31 +14,33 @@
 @section('content')
 <div id="app">
 	<div class="container">
-
-	<alert v-if="answerResult.isVisible" :message="answerResult.message" :icon="answerResult.icon" :alert-class="answerResult.answerClass"></alert>
-<p>
-		 <router-link to="/">/home</router-link>
-  <router-link to="/foo">/foo</router-link>
- 
-</p>
- <router-view></router-view>
-		<div v-for="(quiz,index) in quizzes">
-			@{{ quiz.id }}
+	<div class="row">
+		<div class="col-sm-2">
+		<!-- 	<div v-for="(quiz,index) in quizzes">
+			@{{ quiz.id }} -->
 		</div>
+		</div>
+		<div class="col-sm">
+			
+			<alert v-if="answerResult.isVisible" :message="answerResult.message" :icon="answerResult.icon" :alert-class="answerResult.answerClass"></alert>
 
-
-		<div v-if="quizzes.length != 0" :class="{'animated bounce' : quizzes.length != 0 }" class="card border-primary mb-3" style="max-width: 18rem;" v-for="(quiz,index) in quizzes">
-		  <div class="card-header">Pertanyaan @{{ index  }}</div>
+		<div  :class="{'animated bounce' : quizzes.length != 0 }" class="card border-primary mb-3" style="max-width: 18rem;" v-for="question in question">
+		  <div class="card-header">Pertanyaan </div>
 		  <div class="card-body text-primary">
 		    <h5 class="card-title">Kategori</h5>
-		    <p class="card-text" v-html="quiz.description"></p>
-		    <ul v-for="multiple_choice in quiz.multiple_choice">
+		    <p class="card-text" v-html="question.description"></p>
+		    <ul v-for="multiple_choice in question.multiple_choice">
 		    	<li style="list-style-type: none;"><input type="radio" name="answer" v-model="answer" :value="multiple_choice.answer_choice" /> @{{ multiple_choice.answer_description }}</li>
 		    </ul>
 		  </div>
 		</div>
 		<button class="btn btn-success" @click="checkAnswer" :disabled="answer == ''">Preview</button>
-		<button class="btn btn-primary" @click="fetchQuizzes(quizzes.current_page + 1)" :disabled="answer == '' ">Next</button>
+		<button class="btn btn-primary" @click="nextPage()">Next</button>
+
+		</div>
+	</div>
+
+	
 	</div>
 </div>
 @endsection
@@ -47,19 +49,19 @@
 	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 	<script type="text/javascript">	
 
-	const Home = {template:'<div>Home</div>'};
+	// const Home = {template:'<div>Home</div>'};
 
-	const Foo = {template:'<div>Foo</div>'};	
+	// const Foo = {template:'<div>Foo</div>'};	
 
-	const routes = {};
+	// const routes = {};
 
-	const router = new VueRouter({
-		mode: 'history',
-		 routes:[
-		    { path: '/', component: Home },
-		    { path: '/foo', component: Foo }
-		  ]
-	})
+	// const router = new VueRouter({
+	// 	mode: 'history',
+	// 	 routes:[
+	// 	    { path: '/', component: Home },
+	// 	    { path: '/foo', component: Foo }
+	// 	  ]
+	// })
 
 	Vue.component('alert',{
 		props:['message','alertClass','icon'],
@@ -77,11 +79,12 @@
 	})
 
 		new Vue({
-			router,
 			el:"#app",
 			data:{
 				answer:'',
-				quizzes:[],
+				question:[],
+				quizzes:'',
+				perPage:1,
 				answerResult:{
 					message:'',
 					answerClass:'',
@@ -90,19 +93,54 @@
 				}
 			},
 			mounted(){
-				this.fetchQuizzes(1)
+				this.fetchQuizzes()
 			},
 			methods:{
-				fetchQuizzes(page){
+				fetchQuizzes(){
 					this.answer = ''
 					this.quizzes="";
 					this.answerResult.isVisible=false;
 					setTimeout(()=> { //untuk eksekusi delay 
-						axios.get('api/question?page='+page).then(response=>{
-						this.quizzes = response.data;
-						localStorage.setItem('quizess',JSON.stringify(response.data));
-					})
+						axios.get('api/question').then(response=>{
+						// if (typeof(Strorage) === 'undefined') {
+							localStorage.setItem("quizzes",JSON.stringify(response.data))
+						// }
+					}).then(this.changeQuestion(1))
+						.catch(error=>{
+
+						})
 					}, 500); // selama satu detik
+				},
+				changeQuestion(page){
+					perPage=this.perPage
+					let numPage=this.numberPage()
+					let questions=JSON.parse(localStorage.getItem('quizzes'));
+					if (page < 1) page = 1;
+					if (page > numPage) numPage;
+					
+					
+					for (let i = (page-1)*perPage; i < (page * perPage); i++) {
+						this.question.push(questions[i]);
+					}
+
+				},
+				getQuestion(index){
+					let questions=JSON.parse(localStorage.getItem("quizzes"));
+					this.question=questions[0];
+				},
+				nextPage(){
+					let currentPage=1;
+					let numberPage=this.numberPage()
+					if(currentPage > 1) currentPage = numberPage;
+					currentPage ++;
+					this.changeQuestion(currentPage);
+
+				},
+				numberPage(){
+					perPage=this.perPage
+					let questions=JSON.parse(localStorage.getItem('quizzes'));
+					let numPage=Math.ceil(questions.length / perPage);
+					return numPage;
 				},
 				checkAnswer(){
 					this.answerResult.isVisible=false;
